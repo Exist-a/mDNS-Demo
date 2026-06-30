@@ -81,3 +81,65 @@ answers:
 ## 8. 验收清单
 完整 checklist 见 `.trae/specs/mdns-asset-scanner/checklist.md`,
 实现期每完成一条勾掉一条。
+
+## 9. 实现现状(截至本 commit `bdd6f72`)
+
+### 已完成
+
+| 维度 | 状态 | 证据 |
+|---|---|---|
+| Go 1.24 编译 | ✅ | `go.mod` `go 1.24.0`,Linux amd64 二进制 4.1 MB |
+| 主动 mDNS 单播探测 | ✅ | `internal/mdns/probe.go`,QU bit,worker pool,context 硬超时 |
+| 深度 Banner 识别(qdiscover 6 字段) | ✅ | `internal/banner/parser.go` + 6 个 fixtures,11 字段全命中 |
+| 输入解析(CIDR / 端口多形态) | ✅ | `internal/rangex/rangex.go`,8 个 case |
+| YAML 输出 + JSON 输出 | ✅ | `internal/output/{yaml,json}.go`,6 个 case |
+| CLI 集成 + 退出码 | ✅ | `cmd/mdnsscan/main.go`,5 个 case 覆盖 no-args / help / no-server / missing-arg |
+| 端到端 fake mDNS 测试 | ✅ | `test/e2e_test.go` + `e2e_yaml_parse_test.go`,真实 miekg/dns 收发 |
+| 外部 Python `yaml.safe_load` 验证 | ✅ | `scripts/validate_yaml.py` PASS,校验 11 字段 + TTL 类型 + accessType 值 |
+| 外部 Python `json.load` 验证 | ✅ | `scripts/validate_json.py` PASS |
+| Linux 跨编译 | ✅ | `make build-linux` → `bin/mdnsscan-linux-amd64` |
+| 本地 git commit | ✅ | `bdd6f72` on `main`,27 文件 / 2308 行 |
+
+### 未完成 / 已识别局限
+
+1. **公开 GitHub 仓库推送** — 等待用户授权 + 提供 token
+   - 本地 commit 已就绪,工作树干净
+   - 推送时只需 `git remote add origin <URL>` + `git push -u origin main`
+
+2. **`go test -race ./...` 在 Windows + MinGW 环境无法运行**
+   - 现象:`exit code 0xc0000139 (STATUS_INVALID_IMAGE_FORMAT)`
+   - 原因:MinGW 提供的 gcc 工具链生成的 race detector runtime DLL 与 Windows 不兼容
+   - 影响范围:仅 race detector;非 race 模式 `go test ./...` 全部通过(33/33)
+   - 在 Linux 目标机上 `-race` 应可正常工作(本机无 Linux 验证手段)
+   - 缓解:CI/生产用 Linux runner;本地无需 race 验证
+
+3. **真实网段烟测**
+   - 当前所有路径测试均跑回环 fake DNS(127.0.0.1)验证协议正确性
+   - 未在真实家庭/企业网段的 mDNS 设备上跑过端到端
+   - 缓解:已把 FOFA 公开响应落 fixture,网络行为通过 fixture 回归
+
+4. **IPv6 CIDR**
+   - `rangex.ExpandCIDRs` 显式拒绝 IPv6
+   - spec.md 已声明本期不覆盖(避免 30 分钟窗口内膨胀)
+
+5. **FOFA 在线 API**
+   - 没用真 FOFA API 拉数据(需 token,30 分钟挑战不开口子)
+   - 用离线 fixture 覆盖所有 spec 中点名的 service type
+
+### 自动化验收
+
+```bash
+# 跑全部测试
+go test -count=1 ./...
+
+# 渲染 yaml + json 样本
+go test -count=1 -v -run TestE2E_EmitExamples ./test/...
+
+# 外部 Python 解析验证
+python scripts/validate_yaml.py out/example.yaml
+python scripts/validate_json.py out/example.json
+
+# 跨平台构建
+make build          # 当前 OS
+make build-linux    # linux/amd64
+```

@@ -12,6 +12,9 @@ vendor/
 *.out
 coverage.txt
 
+# Generated sample outputs (produced by `go test -run TestE2E_EmitExamples`)
+out/
+
 # Editor/OS
 .idea/
 .vscode/

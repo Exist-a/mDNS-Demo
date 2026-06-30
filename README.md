@@ -89,5 +89,18 @@ docs/                # 需求 + 选型
 测试 fixture 取自 FOFA 公开查询 `protocol="mdns"` 的活跃响应,
 脱敏后落在 `testdata/fixtures/`,单元测试与端到端测试都引用它。
 
+## 外部解析验证
+输出样本可由 Python 解析(scripts/ 下):
+```bash
+go test -count=1 -v -run TestE2E_EmitExamples ./test/...   # 渲染 out/example.{yaml,json}
+python scripts/validate_yaml.py out/example.yaml
+python scripts/validate_json.py out/example.json
+```
+
+## 实现现状
+- **33/33 测试通过**(Windows 上 `go test -race` 受 MinGW 限制,详见 docs/requirements.md)
+- **本地 commit `bdd6f72`** on `main` 已就绪,待公开仓库 token 授权推送
+- 完整 checklist + 已识别局限见 [docs/requirements.md](docs/requirements.md) §9
+
 ## License
 MIT
