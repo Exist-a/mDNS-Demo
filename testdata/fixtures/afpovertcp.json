@@ -1,0 +1,10 @@
+{
+  "service": "_afpovertcp._tcp.local",
+  "name": "slw-nas(AFP)",
+  "hostname": "slw-nas.local",
+  "ipv4": "192.168.1.100",
+  "ipv6": "fe80::265e:beff:fe69:a313",
+  "port": 548,
+  "ttl": 10,
+  "text": []
+}

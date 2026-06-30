@@ -1,0 +1,25 @@
+# Build artifacts
+bin/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Go workspace
+vendor/
+
+# Test/coverage
+*.out
+coverage.txt
+
+# Editor/OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Local fixtures user may add personally
+testdata/fixtures/*.local.yaml
+
+# Agent meta — specs live in .trae but are not part of the shipped artifact
+.trae/

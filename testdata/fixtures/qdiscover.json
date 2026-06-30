@@ -1,0 +1,17 @@
+{
+  "service": "_qdiscover._tcp.local",
+  "name": "slw-nas",
+  "hostname": "slw-nas.local",
+  "ipv4": "192.168.1.100",
+  "ipv6": "fe80::265e:beff:fe69:a313",
+  "port": 5000,
+  "ttl": 10,
+  "text": [
+    "accessType=https",
+    "accessPort=86",
+    "model=TS-X64",
+    "displayModel=TS-464C",
+    "fwVer=5.2.9",
+    "fwBuildNum=20260214"
+  ]
+}
